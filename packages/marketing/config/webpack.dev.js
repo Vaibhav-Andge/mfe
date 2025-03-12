@@ -1,0 +1,31 @@
+const { merge } = require("webpack-merge"); // merge is a function that is used to merge two different config objects.
+const HtmlWebpackPlugin = require("html-webpack-plugin");
+const commonConfig = require("./webpack.common");
+const ModuleFederationPlugin = require("webpack/lib/container/ModuleFederationPlugin");
+const packageJson = require('../package.json');
+const devConfig = {
+  mode: "development",
+  devServer: {
+    port: "8081",
+    historyApiFallback: {
+      index: "index.html",
+    },
+  },
+  plugins: [
+    // Corrected: "plugins" instead of "plugin"
+    new HtmlWebpackPlugin({
+      template: "./public/index.html", // Fixed template path (dot before "src" removed)
+    }),
+    //module federation plugin integration for sharing whole application to host
+    new ModuleFederationPlugin({
+      name: "marketing",
+      filename: "remoteEntry.js",
+      exposes: {
+        "./MarketingApp": "./src/bootstrap",
+      },
+      shared:packageJson.dependencies
+    }),
+  ],
+};
+
+module.exports = merge(commonConfig, devConfig);
